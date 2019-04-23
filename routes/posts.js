@@ -29,173 +29,77 @@ router.get('/', function(req, res) {
 	const limitParam = query.limit ? eval(appendStringParen(query.limit)) : 0;
 	const countTrue = query.count ? eval(query.count) : false;
 
-	tasks.find(whereParam).select(selectParam).sort(sortParam).skip(skipParam).limit(limitParam)
+	Post.find(whereParam).select(selectParam).sort(sortParam).skip(skipParam).limit(limitParam)
 		.exec()
 		.then((tasks_list) => {
 			res.status(200).send({
-				message: countTrue? "OK. Returned total count of retrieved data." : "OK. List of tasks.",
+				message: countTrue? "OK. Returned total count of retrieved data." : "OK. List of Posts.",
 				data: countTrue ? tasks_list.length : tasks_list
 			});
 		}).catch((err) => {
 			res.status(500).send({
-				message: "Unable to retrieve task list",
+				message: "Unable to retrieve post list",
 				data: []
 			});
 		});
 });
 
 
-router.post('/', function(req, res) {
-	// Mongoose
-	let task = new tasks(req.body);
-	if (task.assignedUser) {
-		taskCounter.findOne({_id: "taskID"})
-			.exec()
-			.then((taskCounterObject) => {
-				User.findById({_id: task.assignedUser})
-				.exec()
-				.then((foundUser) => {
-					console.log(foundUser);
-					if (foundUser) {
-						if (!task.completed) {
-							User.findOneAndUpdate({_id: task.assignedUser}, { $push: {pendingTasks: String(taskCounterObject.seq)} }, 
-								{runValidators: true}).exec()
-							return task.save();
-						} 
-						return task.save();
-					} else {
-						return "No User ID Found!";
-					}
-				}).then((result) => {
-					if (result === "No User ID Found!") {
-						res.status(404).send({
-							message: `No user's with ID ${task.assignedUser} found!`,
-							data: result,
-						});
-					} else {
-						res.status(201).send({
-							message: "OK!",
-							data: result,
-						});
-					}
-				})
-				.catch( err => {
-					res.status(500).send({
-						error: err
-					});
-				})
-			})
-			// .then((taskCounterObject) => {
-				// User.findOneAndUpdate({_id: task.assignedUser}, { $push: {pendingTasks: String(taskCounterObject.seq)} }, 
-				// 	{runValidators: true})
-			// 	.exec()
-			// 	.then((result) => {
-			// 		return task.save();
-			// 	}).then((result) => {
-			// 		res.status(201).send({
-			// 			message: "OK! If assigned User ID does not exist. Number of data Modified would be 0!",
-			// 			data: result,
-			// 			numberOfDataModified: result.nModified
-			// 		});
-			// 	})
-			// 	.catch( err => {
-			// 		res.status(500).send({
-			// 			error: err
-			// 		});
-			// 	})
-			// })
-	} else {
-		task
-		.save()
-		.then((result) => {
-			res.status(201).send({
-				message: "OK!",
-				data: result,
-			});
-		})
-		.catch(error => {
-			res.status(500).send({
-				error: error
-			});
-		});
-	}
-})
-
 // Get certain task based on task ID
 router.get('/:id', function(req, res) {
-	tasks.findOne({_id: req.params.id}).exec()
+	Post.findOne({_id: req.params.id}).exec()
 	.then((task) => {
 		if (task) {
 			res.status(200).send({
-				message: `OK. task ID: ${req.params.id} found.`,
+				message: `OK. Post ID: ${req.params.id} found.`,
 				data:task
 			});
 		} else {
 			res.status(404).send({
-				message: `Cannot Find task of ID: ${req.params.id}`,
+				message: `Cannot Find Post of ID: ${req.params.id}`,
 				data:[]
 			});
 		}
 	}).catch((error) => {
 		console.log(error);
 		res.status(500).send({
-			message: `Server Error: ${error.name}: Cast to number failed for value '${error.value}' at path '${error.path}' for model 'Task' `,
+			message: `Server Error: ${error.name}: Cast to number failed for value '${error.value}' at path '${error.path}' for model 'Post' `,
 			data:[]
 		})
 	});
 })
 
-// Put for tasks/:id
-router.put('/:id', function(req, res) {
-	tasks.update({_id: req.params.id}, req.body, {runValidators: true}).exec(
-		)
-			.then((result) => {
-				
-				res.status(200).send({
-					message: "OK. Data Updated Successfully! If ID does not exist. Number of data Modified would be 0!",
-					data: {
-						numberOfDataModified: result.nModified
-					}
-				});
-			}).catch((error) => {
-				res.status(400).send({
-					message: `Bad, malformed syntax or request body. Error: ${error}`,
-					data: req.body
-				});
-			}); 
-	
-});
 
-// Delete for task/:id
-router.delete('/:id', function(req, res) {
-	tasks.findById({_id: req.params.id}).exec(
-		).then((result) => {
-			if (result) {
-				User.update({_id: String(result.assignedUser)}, { $pull: { pendingTasks: String(result._id) }}).exec()
-				.then((result) => {
-					tasks.deleteOne({_id: String(req.params.id)}).exec()
-					.then((result => {
-						res.status(200).send({
-							message: "OK. Operation Successful.",
-							data: []
-						});
-					}))
-				})
-				.catch(err => {
-					return err;
-				})
-			} else {
-				res.status(404).send({
-					message: "Cannot Find Object for deletion.",
-					data: []
-				});
-			}
-		}).catch((error) => {
-			res.status(400).send({
-				message: `Bad Request. Error : ${error}`
-			});	
-		});
-});
+// // Delete for task/:id
+// router.delete('/:id', function(req, res) {
+// 	tasks.findById({_id: req.params.id}).exec(
+// 		).then((result) => {
+// 			if (result) {
+// 				User.update({_id: String(result.assignedUser)}, { $pull: { pendingTasks: String(result._id) }}).exec()
+// 				.then((result) => {
+// 					tasks.deleteOne({_id: String(req.params.id)}).exec()
+// 					.then((result => {
+// 						res.status(200).send({
+// 							message: "OK. Operation Successful.",
+// 							data: []
+// 						});
+// 					}))
+// 				})
+// 				.catch(err => {
+// 					return err;
+// 				})
+// 			} else {
+// 				res.status(404).send({
+// 					message: "Cannot Find Object for deletion.",
+// 					data: []
+// 				});
+// 			}
+// 		}).catch((error) => {
+// 			res.status(400).send({
+// 				message: `Bad Request. Error : ${error}`
+// 			});	
+// 		});
+// });
 
 
 

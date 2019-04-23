@@ -8,15 +8,13 @@ var postSchema = new mongoose.Schema({
     createdTime: {type: Date, default: Date.now},
     university: String,
     postedBy: {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.ObjectId,
         ref: 'User'
     },
-    comments: [
-        {
-            type: mongoose.Types.ObjectId,
+    comments: [{
+            type: mongoose.Schema.ObjectId,
             ref: 'Comment'
-        }
-    ]
+        }]
 });
 
 module.exports = mongoose.model("Post", postSchema);
