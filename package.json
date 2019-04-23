@@ -1,0 +1,27 @@
+{
+  "name": "cs498finalproject",
+  "version": "1.0.0",
+  "description": "Final Project for CS498RK Spring 2019",
+  "authors": [
+    "Team member names here <uiuc email here>"
+  ],
+  "scripts": {
+    "start": "nodemon --exec node server.js"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "react"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TeemosCode/CS498FinalProject.git"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "mongoose": "^5.4.18",
+    "nodemon": "^1.18.10"
+  }
+}
