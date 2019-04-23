@@ -1,24 +1,11 @@
 var express = require('express'),
 	router = express.Router(),
-	tasks = require('../models/taskSchema'),
-	mongoose = require('mongoose');
-
-taskCounter = require('../models/taskCounterSchema');
-User = require('../models/userSchema');
+	Post = require('../models/postSchema'),
+	mongoose = require('mongoose'),
+	User = require('../models/userSchema');
 
 var fakeDB = require('../models/fakeDB'); // Used for self testing on task apis first
 router.use(express.json())
-
-
-// initialize tasks counter
-taskCounterInit = new taskCounter({
-	_id : "taskID",
-});
-
-taskCounterInit.save().catch(error => {
-	console.log("taskID counter already Initiated. No need to worry!");
-});
-
 
 
 function appendStringParen(queryParam) {
